@@ -58,8 +58,21 @@ int main()
         player.Update();
 
         window.clear(sf::Color::Black);
-
+        for (int i = 0; i < gridWidth; ++i)
+        {
+            for (int j = 0; j < gridHeight; ++j)
+            {
+                camera.Update(
+                    window,
+                    player.hitbox.getPosition().x,
+                    player.hitbox.getPosition().y,
+                    std::vector<Entity*>{ &grid[i][j] }
+                );
+            }
+        }
+        
         camera.Update(window, player.hitbox.getPosition().x, player.hitbox.getPosition().y, std::vector<Entity*>{ &player });
+        
 
         window.display();
     }

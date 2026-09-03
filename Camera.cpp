@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 Camera::Camera(int WINDOW_HEIGHT, int WINDOW_WIDTH, float X, float Y, float Zoom)
     : x(X + (WINDOW_WIDTH / 2.f)),
@@ -12,8 +13,10 @@ void Camera::Update(sf::RenderWindow& window, float playerX, float playerY, std:
 {
     for (Entity* entity : DrawBatch)
     {
-        float entityX = entity->hitbox.getPosition().x * zoom - x;
-        float entityY = entity->hitbox.getPosition().y * zoom - y;
+        float entityX = entity->hitbox.getPosition().x * zoom + x;
+        float entityY = entity->hitbox.getPosition().y * zoom + y;
+
+        std::cout << "Entity (" << entity << ") Position: (" << entityX << ", " << entityY << ")" << ";   " << "Actual Position: (" << entity->hitbox.getPosition().x << ", " << entity->hitbox.getPosition().y << ")" << std::endl;
 
         if (!(entityX < 0 || entityX > window.getSize().x || entityY < 0 || entityY > window.getSize().y))
         {
