@@ -1,26 +1,12 @@
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include "Player.h"
 #include "Camera.h"
-
-class Block : public Entity
-{
-public:
-    Block()
-        : Entity(0.f, 0.f, 0, 0)
-    {
-        hitbox.setFillColor(sf::Color::Green);
-    }
-
-    Block(float x, float y, int width, int height)
-        : Entity(x, y, width, height)
-    {
-        hitbox.setFillColor(sf::Color::Green);
-    }
-};
+#include "Block.h"
 
 
-const int gridWidth = 10;
-const int gridHeight = 5;
+const int gridWidth = 30;
+const int gridHeight = 3;
 Block grid[gridWidth][gridHeight];
 
 const int blockSize = 50; // Size of each block in the grid 
@@ -37,11 +23,16 @@ int main()
 
     Camera camera(window.getSize().y, window.getSize().x, player.hitbox.getPosition().x, player.hitbox.getPosition().y, 1.f);
 
+    std::vector<Entity*> entities;
+    entities.reserve(gridWidth * gridHeight + 1);
+    entities.push_back(&player);
+
     for (int i = 0; i < gridWidth; ++i)
     {
         for (int j = 0; j < gridHeight; ++j)
         {
             grid[i][j] = Block(i * blockSize, j * blockSize, blockSize, blockSize);
+            entities.push_back(&grid[i][j]);
         }
     }
 
@@ -58,21 +49,28 @@ int main()
         player.Update();
 
         window.clear(sf::Color::Black);
-        for (int i = 0; i < gridWidth; ++i)
-        {
-            for (int j = 0; j < gridHeight; ++j)
-            {
-                camera.Update(
-                    window,
-                    player.hitbox.getPosition().x,
-                    player.hitbox.getPosition().y,
-                    std::vector<Entity*>{ &grid[i][j] }
-                );
-            }
+
+        // Collect blocks and the player and let the camera draw them
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)){
+            camera.x -= camera.speed;
         }
-        
-        camera.Update(window, player.hitbox.getPosition().x, player.hitbox.getPosition().y, std::vector<Entity*>{ &player });
-        
+
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)){
+            camera.x += camera.speed;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)){
+            camera.y += camera.speed;
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)){
+            camera.y -= camera.speed;
+        }
+
+
+        camera.Update(window, player.hitbox.getPosition().x, player.hitbox.getPosition().y, entities);
 
         window.display();
     }
