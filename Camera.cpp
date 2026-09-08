@@ -16,7 +16,6 @@ void Camera::Update(sf::RenderWindow& window, float playerX, float playerY, std:
         float entityX = entity->hitbox.getPosition().x * zoom + x;
         float entityY = entity->hitbox.getPosition().y * zoom + y;
 
-        std::cout << "Entity (" << entity << ") Position: (" << entityX << ", " << entityY << ")" << ";   " << "Actual Position: (" << entity->hitbox.getPosition().x << ", " << entity->hitbox.getPosition().y << ")" << std::endl;
 
         if (!(entityX < 0 || entityX > window.getSize().x || entityY < 0 || entityY > window.getSize().y))
         {
