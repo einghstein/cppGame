@@ -16,6 +16,8 @@ private:
 
     float velocity_x;
     float velocity_y;
+    float drag = 0.0001f;
 
-    float speed = 0.0001f;
+    float speed = 0.001f;
+    float gravity = 0.0005f;
 };
