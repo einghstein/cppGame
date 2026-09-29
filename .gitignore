@@ -1,0 +1,6 @@
+build/
+main
+game
+*.o
+*.obj
+*.exe
