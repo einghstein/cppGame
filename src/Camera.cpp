@@ -17,7 +17,7 @@ void Camera::Update(sf::RenderWindow& window, float playerX, float playerY, std:
         float entityY = entity->hitbox.getPosition().y * zoom + y;
 
 
-        if (!(entityX < 0 - entity->hitbox.getSize().x || entityX > window.getSize().x || entityY < 0 || entityY - entity->hitbox.getSize().y > window.getSize().y))
+        if (!(entityX < 0 - entity->hitbox.getSize().x || entityX > window.getSize().x || entityY < 0 - entity->hitbox.getSize().y || entityY > window.getSize().y))
         {
             entity->EDraw(window, entityX, entityY);
         }
