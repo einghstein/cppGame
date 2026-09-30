@@ -4,108 +4,19 @@ set -eu
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$ROOT_DIR/src"
 OUT_DIR="$ROOT_DIR/build"
-OS_NAME="$(uname -s)"
-CXX="${CXX:-c++}"
-PKG_CONFIG="${PKG_CONFIG:-pkg-config}"
-SFML_PACKAGES=(sfml-graphics sfml-window sfml-system)
-
-case "$OS_NAME" in
-  Linux*)
-    PLATFORM="Linux"
-    OUTPUT="$OUT_DIR/omarchu"
-    ;;
-  Darwin*)
-    PLATFORM="macOS"
-    OUTPUT="$OUT_DIR/omarchu"
-    ;;
-  MINGW*|MSYS*|CYGWIN*)
-    PLATFORM="Windows (POSIX shell)"
-    OUTPUT="$OUT_DIR/omarchu.exe"
-    ;;
-  *)
-    PLATFORM="$OS_NAME"
-    OUTPUT="$OUT_DIR/omarchu"
-    ;;
-esac
+OUTPUT="$OUT_DIR/game"
 
 mkdir -p "$OUT_DIR"
 
-if ! command -v "$CXX" >/dev/null 2>&1; then
-  printf 'Error: C++ compiler not found: %s\n' "$CXX" >&2
-  printf 'Set CXX to an installed C++17 compiler (for example, g++ or clang++).\n' >&2
-  exit 1
-fi
-
-if ! command -v "$PKG_CONFIG" >/dev/null 2>&1; then
-  printf 'Error: pkg-config was not found. Install pkg-config and SFML 3 development files.\n' >&2
-  exit 1
-fi
-
-if ! "$PKG_CONFIG" --exists "${SFML_PACKAGES[@]}"; then
-  printf 'Error: SFML development packages were not found by pkg-config.\n' >&2
-  printf 'This project uses the SFML 3 API; install SFML 3 and ensure its .pc files are discoverable.\n' >&2
-  exit 1
-fi
-
-SFML_VERSION="$("$PKG_CONFIG" --modversion sfml-graphics)"
-SFML_MAJOR="${SFML_VERSION%%.*}"
-if [[ ! "$SFML_MAJOR" =~ ^[0-9]+$ ]] || (( SFML_MAJOR < 3 )); then
-  printf 'Error: found SFML %s, but this project requires SFML 3 or newer.\n' "$SFML_VERSION" >&2
-  exit 1
-fi
-
-read -r -a SFML_CFLAGS <<< "$("$PKG_CONFIG" --cflags "${SFML_PACKAGES[@]}")"
-read -r -a SFML_LIBS <<< "$("$PKG_CONFIG" --libs "${SFML_PACKAGES[@]}")"
-SFML_LIBDIR_FLAGS=()
-
-add_library_directory() {
-  if [[ -n "$1" && -d "$1" ]]; then
-    SFML_LIBDIR_FLAGS+=("-L$1")
-  fi
-}
-
-# Some SFML .pc files omit -L even when the libraries live outside the linker's
-# default search path. Prefer the paths reported by pkg-config, then common
-# install locations and the platform's multiarch directory.
-for package in "${SFML_PACKAGES[@]}"; do
-  add_library_directory "$("$PKG_CONFIG" --variable=libdir "$package")"
-done
-
-if [[ -n "${SFML_ROOT:-}" ]]; then
-  add_library_directory "$SFML_ROOT/lib"
-  add_library_directory "$SFML_ROOT/lib64"
-  add_library_directory "$SFML_ROOT/lib/x64"
-fi
-
-if [[ "$PLATFORM" == "Linux" ]]; then
-  add_library_directory /usr/local/lib
-  add_library_directory /usr/local/lib64
-  add_library_directory /usr/lib64
-  MULTIARCH="$($CXX -print-multiarch 2>/dev/null || true)"
-  if [[ -n "$MULTIARCH" ]]; then
-    add_library_directory "/usr/lib/$MULTIARCH"
-    add_library_directory "/usr/local/lib/$MULTIARCH"
-  fi
-fi
-
-printf 'Platform: %s (%s)\n' "$PLATFORM" "$(uname -m)"
-printf 'Compiler: %s\n' "$CXX"
-printf 'SFML: %s\n' "$SFML_VERSION"
-printf 'Building: %s\n' "$OUTPUT"
-
-"$CXX" -std=c++17 -Wall -Wextra \
-  -I"$SRC_DIR" \
-  "${SFML_CFLAGS[@]}" \
+g++ -std=c++17 -Wall -Wextra \
+  -I/usr/local/include \
+  -I"$ROOT_DIR/src" \
   "$SRC_DIR"/*.cpp \
-  "${SFML_LIBDIR_FLAGS[@]}" \
-  "${SFML_LIBS[@]}" \
+  -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lsfml-audio-s -lsfml-network-s \
+  -lfreetype -lz -lbz2 -lpng16 -lGL -lX11 -lXrandr -lXcursor -lXfixes -lXi -ludev \
+  -l:libxkbcommon.so.0 -l:libxkbcommon-x11.so.0 \
+  -lopenal -lvorbisenc -lvorbis -logg -lvorbisfile -lFLAC -pthread \
   -o "$OUTPUT"
 
-if [[ "${BUILD_ONLY:-0}" == "1" ]]; then
-  printf 'BUILD_ONLY=1; skipping execution.\n'
-  exit 0
-fi
-
 printf '\nRunning %s\n' "$OUTPUT"
-cd "$ROOT_DIR"
-exec "$OUTPUT" "$@"
+exec "$OUTPUT"
