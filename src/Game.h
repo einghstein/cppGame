@@ -1,3 +1,4 @@
+/*
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Block.h"
@@ -14,3 +15,4 @@ public:
     Player player;
     Camera camera;
 };
+*/
