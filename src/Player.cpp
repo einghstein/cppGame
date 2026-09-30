@@ -30,7 +30,31 @@ void Player::Update(bool isOnGround, float deltaTime)
         velocity_y = -jumpForce;
 
     // Handles horizontal movement
-    /*if (velocity_x > 0.f){ // Going right
+    
+
+    if (velocity_x > 0.f && isOnGround){
+        velocity_x -= drag * dt * std::abs(velocity_x);
+    }
+    else if (velocity_x < 0.f && isOnGround){
+        velocity_x += drag * dt * std::abs(velocity_x);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && isOnGround)
+        velocity_x -= speed * dt;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) && isOnGround)
+        velocity_x += speed * dt;
+
+    if (!isOnGround && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+        velocity_x -= speed * dt * 0.5f;
+    if (!isOnGround && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+        velocity_x += speed * dt * 0.5f;
+    
+
+    hitbox.move({ velocity_x * dt, velocity_y * dt });
+}
+
+
+
+/*if (velocity_x > 0.f){ // Going right
         if (isOnGround) {
             velocity_x -= drag * dt;
 
@@ -59,23 +83,3 @@ void Player::Update(bool isOnGround, float deltaTime)
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) && isOnGround)
             velocity_x += speed * dt;
     }*/
-
-    if (velocity_x > 0.f && isOnGround){
-        velocity_x -= drag * dt * std::abs(velocity_x);
-    }
-    else if (velocity_x < 0.f && isOnGround){
-        velocity_x += drag * dt * std::abs(velocity_x);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && isOnGround)
-        velocity_x -= speed * dt;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) && isOnGround)
-        velocity_x += speed * dt;
-
-    if (!isOnGround && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-        velocity_x -= speed * dt * 0.5f;
-    if (!isOnGround && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-        velocity_x += speed * dt * 0.5f;
-    
-
-    hitbox.move({ velocity_x * dt, velocity_y * dt });
-}

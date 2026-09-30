@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 
         player.Update(isOnGround, deltaTime);
 
-        window.clear(sf::Color::Black);
+        
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
         {
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
             camera.y = - player.hitbox.getPosition().y + (window.getSize().y / 2.f);
         }
 
-        camera.Update(window, player.hitbox.getPosition().x, player.hitbox.getPosition().y, entities);
+        camera.Update(window, entities);
 
         debugText.setString(
             "Camera: (" + std::to_string((int)camera.x) + ", " + std::to_string((int)camera.y) + ")\n" +

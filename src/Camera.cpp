@@ -9,8 +9,9 @@ Camera::Camera(int WINDOW_HEIGHT, int WINDOW_WIDTH, float X, float Y, float Zoom
 {
 }
 
-void Camera::Update(sf::RenderWindow& window, float playerX, float playerY, std::vector<Entity*> DrawBatch)
+void Camera::Update(sf::RenderWindow& window, std::vector<Entity*> DrawBatch)
 {
+    window.clear(sf::Color::Black);
     for (Entity* entity : DrawBatch)
     {
         float entityX = entity->hitbox.getPosition().x * zoom + x;
