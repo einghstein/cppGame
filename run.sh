@@ -56,6 +56,37 @@ fi
 
 read -r -a SFML_CFLAGS <<< "$("$PKG_CONFIG" --cflags "${SFML_PACKAGES[@]}")"
 read -r -a SFML_LIBS <<< "$("$PKG_CONFIG" --libs "${SFML_PACKAGES[@]}")"
+SFML_LIBDIR_FLAGS=()
+
+add_library_directory() {
+  if [[ -n "$1" && -d "$1" ]]; then
+    SFML_LIBDIR_FLAGS+=("-L$1")
+  fi
+}
+
+# Some SFML .pc files omit -L even when the libraries live outside the linker's
+# default search path. Prefer the paths reported by pkg-config, then common
+# install locations and the platform's multiarch directory.
+for package in "${SFML_PACKAGES[@]}"; do
+  add_library_directory "$("$PKG_CONFIG" --variable=libdir "$package")"
+done
+
+if [[ -n "${SFML_ROOT:-}" ]]; then
+  add_library_directory "$SFML_ROOT/lib"
+  add_library_directory "$SFML_ROOT/lib64"
+  add_library_directory "$SFML_ROOT/lib/x64"
+fi
+
+if [[ "$PLATFORM" == "Linux" ]]; then
+  add_library_directory /usr/local/lib
+  add_library_directory /usr/local/lib64
+  add_library_directory /usr/lib64
+  MULTIARCH="$($CXX -print-multiarch 2>/dev/null || true)"
+  if [[ -n "$MULTIARCH" ]]; then
+    add_library_directory "/usr/lib/$MULTIARCH"
+    add_library_directory "/usr/local/lib/$MULTIARCH"
+  fi
+fi
 
 printf 'Platform: %s (%s)\n' "$PLATFORM" "$(uname -m)"
 printf 'Compiler: %s\n' "$CXX"
@@ -66,6 +97,7 @@ printf 'Building: %s\n' "$OUTPUT"
   -I"$SRC_DIR" \
   "${SFML_CFLAGS[@]}" \
   "$SRC_DIR"/*.cpp \
+  "${SFML_LIBDIR_FLAGS[@]}" \
   "${SFML_LIBS[@]}" \
   -o "$OUTPUT"
 
