@@ -18,13 +18,11 @@ private:
     int hp;
     Item inventory[10];
 
-
     float drag;
-
+    float speed;
     float dir_switch_speed_amplifier;
     float max_speed;
 
-    float speed;
     float gravity = 1600.0f;
     float jumpForce = 700.0f;
 };
