@@ -1,7 +1,7 @@
+run.sh
 build/
 main
 game
 *.o
 *.obj
 *.exe
-run.sh
