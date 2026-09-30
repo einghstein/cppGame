@@ -5,144 +5,56 @@
 #include "Camera.h"
 #include "Block.h"
 #include "FontLoader.h"
+#include "Game.h"
+#include "isOnGround.h"
+
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 600;
 
 const int gridWidth = 300;
 const int gridHeight = 3;
-Block grid[gridWidth][gridHeight];
-
 const int blockSize = 50; // Size of each block in the grid 
+
 
 int main(int, char* argv[])
 {
-    sf::RenderWindow window(
-        sf::VideoMode({800, 600}),
-        "SFML Window"
-    );
+    Game game(WINDOW_HEIGHT, WINDOW_WIDTH, argv[0]);
 
-    sf::Clock clock;
 
-    sf::Font debugFont;
-    if (!FontLoader::load(debugFont, argv[0]))
-        return 1;
-
-    sf::Text debugText(debugFont);
+    sf::Text debugText(game.debugFont);
     debugText.setCharacterSize(20);
     debugText.setFillColor(sf::Color::White);
     debugText.setPosition(sf::Vector2f(10.f, 10.f));
 
-    Player player(300.f, -100.f, blockSize, blockSize, 0.8f, 300.0f);
+    game.InitGrid(game.entities, gridWidth, gridHeight, blockSize);
 
-    Camera camera(window.getSize().y, window.getSize().x, player.hitbox.getPosition().x, player.hitbox.getPosition().y, 1.f);
-
-    std::vector<Entity*> entities;
-    entities.reserve(gridWidth * gridHeight + 1);
-    entities.push_back(&player);
-
-    for (int i = 0; i < gridWidth; ++i)
+    while (game.window.isOpen())
     {
-        for (int j = 0; j < gridHeight; ++j)
-        {
-            grid[i][j] = Block(i * blockSize, j * blockSize, blockSize, blockSize);
-            entities.push_back(&grid[i][j]);
-        }
-    }
+        const float deltaTime = game.clock.restart().asSeconds();
 
-    while (window.isOpen())
-    {
-        const float deltaTime = clock.restart().asSeconds();
-
-        while (const auto event = window.pollEvent())
+        while (const auto event = game.window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
             {
-                window.close();
+                game.window.close();
             }
         }
-
-        bool isOnGround = false;
-        for (int i = 0; i < gridWidth; ++i)
-        {
-            for (int j = 0; j < gridHeight; ++j)
-            {
-                Block& block = grid[i][j];
-                if (player.hitbox.getGlobalBounds().findIntersection(block.hitbox.getGlobalBounds()))
-                {
-                    isOnGround = true;
-                    break;
-                }
-            }
-            if (isOnGround)
-                break;
-        }
-
-        player.Update(isOnGround, deltaTime);
 
         
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-        {
-            camera.x -= camera.speed * deltaTime;
-        }
+        game.player.Update(game.isOnGround(game.player, game.grid), deltaTime);
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-        {
-            camera.x += camera.speed * deltaTime;
-        }
+        game.keyPressHandler(deltaTime);
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
-        {
-            camera.y += camera.speed * deltaTime;
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
-        {
-            camera.y -= camera.speed * deltaTime;
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Add))
-        {
-            camera.zoom += 0.01f;
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Subtract))
-        {
-            camera.zoom -= 0.01f;
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
-        {
-            camera.x = player.hitbox.getPosition().x + (window.getSize().x / 2.f);
-            camera.y = player.hitbox.getPosition().y + (window.getSize().y / 2.f);
-            camera.zoom = 1.f;
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
-        {
-            player.hitbox.setPosition(sf::Vector2f(100.f, -100.f));
-            player.resetVelocity();
-            camera.x = player.hitbox.getPosition().x + (window.getSize().x / 2.f);
-            camera.y = player.hitbox.getPosition().y + (window.getSize().y / 2.f);
-            camera.zoom = 1.f;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F))
-        {
-            camera.followPlayer = !camera.followPlayer;
-        }
-        if (camera.followPlayer)
-        {
-            camera.x =  - player.hitbox.getPosition().x + (window.getSize().x / 2.f);
-            camera.y = - player.hitbox.getPosition().y + (window.getSize().y / 2.f);
-        }
-
-        camera.Update(window, entities);
+        game.camera.Update(game.window, game.entities);
 
         debugText.setString(
-            "Camera: (" + std::to_string((int)camera.x) + ", " + std::to_string((int)camera.y) + ")\n" +
-            "Player Position: (" + std::to_string((int)player.hitbox.getPosition().x) + ", " + std::to_string((int)player.hitbox.getPosition().y) + ")" + "\n" +
-            "Player Speed: " + std::to_string(player.velocity_x) + ", " + std::to_string(player.velocity_y) + "\n"
+            "Camera: (" + std::to_string((int)game.camera.x) + ", " + std::to_string((int)game.camera.y) + ")\n" +
+            "Player Position: (" + std::to_string((int)game.player.hitbox.getPosition().x) + ", " + std::to_string((int)game.player.hitbox.getPosition().y) + ")\n" +
+            "Player Speed: " + std::to_string(game.player.velocity_x) + ", " + std::to_string(game.player.velocity_y) + "\n"
         );
-        window.draw(debugText);
-        window.display();
+        game.window.draw(debugText);
+        game.window.display();
     }
 
     return 0;
