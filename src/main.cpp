@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "Camera.h"
 #include "Block.h"
-
+#include "FontLoader.h"
 
 const int gridWidth = 300;
 const int gridHeight = 3;
@@ -12,7 +12,7 @@ Block grid[gridWidth][gridHeight];
 
 const int blockSize = 50; // Size of each block in the grid 
 
-int main(int argc, char* argv[])
+int main(int, char* argv[])
 {
     sf::RenderWindow window(
         sf::VideoMode({800, 600}),
@@ -22,10 +22,8 @@ int main(int argc, char* argv[])
     sf::Clock clock;
 
     sf::Font debugFont;
-    if (!debugFont.openFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
-    {
+    if (!FontLoader::load(debugFont, argv[0]))
         return 1;
-    }
 
     sf::Text debugText(debugFont);
     debugText.setCharacterSize(20);
