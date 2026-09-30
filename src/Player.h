@@ -10,14 +10,19 @@ public:
 
     void Update(bool isOnGround, float deltaTime);
     void resetVelocity() { velocity_x = 0.f; velocity_y = 0.f; }
+    
+    float velocity_x = 0.0f;
+    float velocity_y = 0.0f;
 
 private:
     int hp;
     Item inventory[10];
 
-    float velocity_x = 0.0f;
-    float velocity_y = 0.0f;
+
     float drag;
+
+    float dir_switch_speed_amplifier;
+    float max_speed;
 
     float speed;
     float gravity = 1600.0f;

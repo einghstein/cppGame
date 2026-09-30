@@ -11,4 +11,5 @@ public:
     float x;
     float y;
     float zoom;
+    bool followPlayer = true; // Flag to determine whether the camera should follow the player or not
 };

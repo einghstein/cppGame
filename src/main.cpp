@@ -6,7 +6,7 @@
 #include "Block.h"
 
 
-const int gridWidth = 30;
+const int gridWidth = 300;
 const int gridHeight = 3;
 Block grid[gridWidth][gridHeight];
 
@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
     debugText.setFillColor(sf::Color::White);
     debugText.setPosition(sf::Vector2f(10.f, 10.f));
 
-    Player player(100.f, -100.f, blockSize, blockSize, 1.0f, 30.0f);
+    Player player(300.f, -100.f, blockSize, blockSize, 0.8f, 300.0f);
 
     Camera camera(window.getSize().y, window.getSize().x, player.hitbox.getPosition().x, player.hitbox.getPosition().y, 1.f);
 
@@ -62,11 +62,11 @@ int main(int argc, char* argv[])
         }
 
         bool isOnGround = false;
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < gridWidth; ++i)
         {
-            for (int j = 0; j < 30; ++j)
+            for (int j = 0; j < gridHeight; ++j)
             {
-                Block& block = grid[j][i];
+                Block& block = grid[i][j];
                 if (player.hitbox.getGlobalBounds().findIntersection(block.hitbox.getGlobalBounds()))
                 {
                     isOnGround = true;
@@ -126,12 +126,22 @@ int main(int argc, char* argv[])
             camera.y = player.hitbox.getPosition().y + (window.getSize().y / 2.f);
             camera.zoom = 1.f;
         }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F))
+        {
+            camera.followPlayer = !camera.followPlayer;
+        }
+        if (camera.followPlayer)
+        {
+            camera.x =  - player.hitbox.getPosition().x + (window.getSize().x / 2.f);
+            camera.y = - player.hitbox.getPosition().y + (window.getSize().y / 2.f);
+        }
 
         camera.Update(window, player.hitbox.getPosition().x, player.hitbox.getPosition().y, entities);
 
         debugText.setString(
             "Camera: (" + std::to_string((int)camera.x) + ", " + std::to_string((int)camera.y) + ")\n" +
-            "Player: (" + std::to_string((int)player.hitbox.getPosition().x) + ", " + std::to_string((int)player.hitbox.getPosition().y) + ")"
+            "Player Position: (" + std::to_string((int)player.hitbox.getPosition().x) + ", " + std::to_string((int)player.hitbox.getPosition().y) + ")" + "\n" +
+            "Player Speed: " + std::to_string(player.velocity_x) + ", " + std::to_string(player.velocity_y) + "\n"
         );
         window.draw(debugText);
         window.display();
