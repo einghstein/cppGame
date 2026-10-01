@@ -6,7 +6,7 @@
 Game::Game(int WINDOW_HEIGHT, int WINDOW_WIDTH, const char* executablePath)
     : clock(),
       debugFont(),
-      player(300.f, -100.f, 50, 50, 0.8f, 300.0f), // Player X, Y, width. height, drag, speed
+      player(300.f, -100.f, 50, 50, 0.8f, 300.0f, this), // Player X, Y, width. height, drag, speed, game
       entities(),
       camera(WINDOW_HEIGHT, WINDOW_WIDTH, 300.f, -100.f, 1.f), // WH, WW, X, Y, Zoom
       window(

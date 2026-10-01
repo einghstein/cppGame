@@ -8,15 +8,18 @@ class Game;
 class Player : public Entity
 {
 public:
-    Player(float x, float y, int width, int height, float drag, float speed);
+    Player(float x, float y, int width, int height, float drag, float speed, Game* game);
 
-    void Update(bool isOnGround, float deltaTime, Game* game);
+    void Update(float deltaTime, int steps);
     void resetVelocity() { velocity_x = 0.f; velocity_y = 0.f; }
-    void mouseUpdate(Game* game);
+    void mouseUpdate();
+    bool isOnGround(float tolerance = 5.f) const;
     
     float velocity_x = 0.0f;
     float velocity_y = 0.0f;
     int hp;
+
+    Game *game; // Pointer to the Game instance
 
 private:
     Item inventory[10];

@@ -6,7 +6,6 @@
 #include "Block.h"
 #include "FontLoader.h"
 #include "Game.h"
-#include "isOnGround.h"
 
 // constants for window dimensions and grid configuration
 
@@ -50,13 +49,13 @@ int main(int, char* argv[])
             }
             if (event->is<sf::Event::MouseButtonPressed>())
             {
-                game.player.mouseUpdate(&game);
+                game.player.mouseUpdate();
             }
         }
 
         // Game update
 
-        game.player.Update(isOnGround(game.player, game.grid), deltaTime, &game);
+        game.player.Update(deltaTime, 50);
 
         game.keyPressHandler(deltaTime);
 

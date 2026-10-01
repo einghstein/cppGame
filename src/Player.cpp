@@ -5,7 +5,7 @@
 #include <cmath>
 #include "Game.h"
 
-Player::Player(float x, float y, int width, int height, float drag, float speed)
+Player::Player(float x, float y, int width, int height, float drag, float speed, Game* game)
     : Entity(x, y, width, height),
       hp(100),
       velocity_x(0.f),
@@ -13,11 +13,12 @@ Player::Player(float x, float y, int width, int height, float drag, float speed)
       drag(drag),
       speed(speed),
       dir_switch_speed_amplifier(2.0f),
-      max_speed(30.f)
+      max_speed(30.f),
+      game(game)
 {
 }
 
-void Player::mouseUpdate(Game* game)
+void Player::mouseUpdate()
 {
 
     char button = 'N'; // Default to 'N' for no button pressed
@@ -47,62 +48,102 @@ void Player::mouseUpdate(Game* game)
     }
 }
 
-void Player::Update(bool isOnGround, float deltaTime, Game* game)
+void Player::Update(float deltaTime, int steps)
 {
     const float dt = std::min(deltaTime, 0.033f);
+    bool TrulyOnGround;
 
     // Handles vertical movement
-    if (!isOnGround)
-        velocity_y += gravity * dt;
-    else
-        velocity_y = 0.f;
+    bool isOnGround = this->isOnGround(50/steps);
+    
+    for (int i = 0; i < steps; ++i) {
+        if (!isOnGround)
+            velocity_y += gravity * dt * (1.f / static_cast<float>(steps));
+        else
+            velocity_y = 0.f;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && isOnGround)
-        velocity_y = -jumpForce;
+        
+
+        hitbox.move({ 0, velocity_y * dt * (1.f / static_cast<float>(steps)) });
+
+        // Check for collisions with other blocks when going downwards
+        if (this->isOnGround(50/steps))
+        {
+            hitbox.move({ 0.f, -velocity_y * dt * (1.f / static_cast<float>(steps)) }); // Move back to previous position
+            velocity_y = 0.f; // Stop vertical movement
+            TrulyOnGround = true;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+                velocity_y = -jumpForce; // Apply jump force if W is pressed
+             
+            break; // Exit the loop since we only need to handle one collision at a time
+        }
+        else
+        {
+            TrulyOnGround = false;
+        }
+    }
+
 
     // Handles horizontal movement
     
 
-    if (velocity_x > 0.f && isOnGround){
+    if (velocity_x > 0.f && TrulyOnGround){
         velocity_x -= drag * dt * std::abs(velocity_x);
     }
-    else if (velocity_x < 0.f && isOnGround){
+    else if (velocity_x < 0.f && TrulyOnGround){
         velocity_x += drag * dt * std::abs(velocity_x);
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && isOnGround)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) && TrulyOnGround)
         velocity_x -= speed * dt;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) && isOnGround)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) && TrulyOnGround)
         velocity_x += speed * dt;
 
-    if (!isOnGround && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+    if (!TrulyOnGround && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         velocity_x -= speed * dt * 0.5f;
-    if (!isOnGround && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+    if (!TrulyOnGround && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         velocity_x += speed * dt * 0.5f;
     
 
 
     
-    hitbox.move({ velocity_x * dt, velocity_y * dt });
+    hitbox.move({ velocity_x * dt, 0 });
 
     // Check for collisions with other blocks when going sideways
     for (const auto& block : game->grid)
     {
-        if (hitbox.getGlobalBounds().intersects(block.hitbox.getGlobalBounds()))
+        if (hitbox.getGlobalBounds().findIntersection(block.hitbox.getGlobalBounds()))
         {
-            if (velocity_x > 0.f) // Moving right
-            {
-                hitbox.setPosition(sf::Vector2f(hitbox.getPosition().x - hitbox.getSize().x, hitbox.getPosition().y));
-                velocity_x = 0.f;
-            }
-            else if (velocity_x < 0.f) // Moving left
-            {
-                hitbox.setPosition(sf::Vector2f(block.hitbox.getPosition().x + block.hitbox.getSize().x, hitbox.getPosition().y));
-                velocity_x = 0.f;
-            }
+            hitbox.move({ -velocity_x * dt, 0.f }); // Move back to previous position
+            velocity_x = 0.f; // Stop horizontal movement
+            break; // Exit the loop since we only need to handle one collision at a time
         }
     }
 }
 
+
+bool Player::isOnGround(float tolerance) const
+{
+    for (const auto& block : game->grid)
+    {
+        float playerBottom = hitbox.getPosition().y + hitbox.getSize().y;
+        float blockTop = block.hitbox.getPosition().y;
+        float playerLeft = hitbox.getPosition().x;
+        float playerRight = hitbox.getPosition().x + hitbox.getSize().x;
+        float blockLeft = block.hitbox.getPosition().x;
+        float blockRight = block.hitbox.getPosition().x + block.hitbox.getSize().x;
+
+        float playerDistanceToBlock = std::abs(playerBottom - blockTop);
+
+        if (-tolerance <= playerDistanceToBlock && playerDistanceToBlock <= tolerance && // Check if player's bottom is near the block's top
+            playerRight > blockLeft && playerLeft < blockRight) // Check if player's horizontal position overlaps with the block
+        {
+            return true; // Player is on the ground
+        }
+        
+
+    }
+    return false;
+}
 
 
 /*if (velocity_x > 0.f){ // Going right
