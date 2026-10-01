@@ -8,6 +8,8 @@
 #include "Game.h"
 #include "isOnGround.h"
 
+// constants for window dimensions and grid configuration
+
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
 
@@ -18,6 +20,7 @@ const int blockSize = 50; // Size of each block in the grid
 
 int main(int, char* argv[])
 {
+    // Initi
     Game game(WINDOW_HEIGHT, WINDOW_WIDTH, argv[0]);
 
 
@@ -28,10 +31,15 @@ int main(int, char* argv[])
 
     game.InitGrid(gridWidth, gridHeight, blockSize);
 
-    printf("Entity count after InitGrid: %zu\n", game.entities.size());
+    game.player.DrawHitbox = true;
+
+    // Main game loop
 
     while (game.window.isOpen())
     {
+
+        // dt and event handling
+
         const float deltaTime = game.clock.restart().asSeconds();
 
         while (const auto event = game.window.pollEvent())
@@ -40,11 +48,24 @@ int main(int, char* argv[])
             {
                 game.window.close();
             }
+            if (event->is<sf::Event::MouseButtonPressed>())
+            {
+                game.player.mouseUpdate(&game);
+            }
         }
 
-        game.player.Update(isOnGround(game.player, game.grid), deltaTime);
+        // Game update
+
+        game.player.Update(isOnGround(game.player, game.grid), deltaTime, &game);
 
         game.keyPressHandler(deltaTime);
+
+
+
+        game.getBlockAtPosition(game.camera.screenToWorld(sf::Vector2f(sf::Mouse::getPosition(game.window))));
+
+        // Rendering
+        
 
         game.camera.Update(game.window, game.entities);
 

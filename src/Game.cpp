@@ -21,6 +21,41 @@ Game::Game(int WINDOW_HEIGHT, int WINDOW_WIDTH, const char* executablePath)
         std::cerr << "Failed to load font\n";
 }
 
+Block* Game::getBlockAtPosition(float x, float y)
+{
+    for (Block& block : grid)
+    {
+        if (block.hitbox.getGlobalBounds().contains(sf::Vector2f(x, y)))
+        {
+            return &block;
+        }
+    }
+    return nullptr; // Return a default Block if no block is found at the position
+}
+Block* Game::getBlockAtPosition(sf::Vector2f worldPos)
+{
+    for (Block& block : grid)
+    {
+        if (block.hitbox.getGlobalBounds().contains(worldPos))
+        {
+            return &block;
+        }
+    }
+    return nullptr; // Return a default Block if no block is found at the position
+}
+
+void Game::removeBlockAtPosition(float x, float y)
+{
+    for (auto it = grid.begin(); it != grid.end(); ++it)
+    {
+        if (it->hitbox.getGlobalBounds().contains(sf::Vector2f(x, y)))
+        {
+            grid.erase(it);
+            return; // Exit after removing the block
+        }
+    }
+}
+
 void Game::InitGrid( const int gridWidth, const int gridHeight, const int blockSize)
 {
     this->gridWidth = gridWidth;

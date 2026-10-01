@@ -3,6 +3,7 @@
 #include "Block.h"
 #include <algorithm>
 #include <cmath>
+#include "Game.h"
 
 Player::Player(float x, float y, int width, int height, float drag, float speed)
     : Entity(x, y, width, height),
@@ -16,7 +17,37 @@ Player::Player(float x, float y, int width, int height, float drag, float speed)
 {
 }
 
-void Player::Update(bool isOnGround, float deltaTime)
+void Player::mouseUpdate(Game* game)
+{
+
+    char button = 'N'; // Default to 'N' for no button pressed
+                sf::Vector2i mousePosWin = sf::Mouse::getPosition(game->window);
+                if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+                {
+                    button = 'L';
+                }
+                else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
+                {
+                    button = 'R';
+                   
+                }
+                
+                sf::Vector2f mousePos = game->camera.screenToWorld(mousePosWin.x, mousePosWin.y);
+
+    if (button == 'L') {
+        game->removeBlockAtPosition(mousePos.x, mousePos.y);
+    } else if (button == 'R') {
+        // Handle right mouse button click
+        if (game->getBlockAtPosition(mousePos.x, mousePos.y) != nullptr) {
+            printf("%p\n", static_cast<void*>(game->getBlockAtPosition(mousePos.x, mousePos.y)));
+        }
+        else {
+            printf("No block found at position (%f, %f)\n", static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+        }
+    }
+}
+
+void Player::Update(bool isOnGround, float deltaTime, Game* game)
 {
     const float dt = std::min(deltaTime, 0.033f);
 
@@ -49,7 +80,27 @@ void Player::Update(bool isOnGround, float deltaTime)
         velocity_x += speed * dt * 0.5f;
     
 
+
+    
     hitbox.move({ velocity_x * dt, velocity_y * dt });
+
+    // Check for collisions with other blocks when going sideways
+    for (const auto& block : game->grid)
+    {
+        if (hitbox.getGlobalBounds().intersects(block.hitbox.getGlobalBounds()))
+        {
+            if (velocity_x > 0.f) // Moving right
+            {
+                hitbox.setPosition(sf::Vector2f(hitbox.getPosition().x - hitbox.getSize().x, hitbox.getPosition().y));
+                velocity_x = 0.f;
+            }
+            else if (velocity_x < 0.f) // Moving left
+            {
+                hitbox.setPosition(sf::Vector2f(block.hitbox.getPosition().x + block.hitbox.getSize().x, hitbox.getPosition().y));
+                velocity_x = 0.f;
+            }
+        }
+    }
 }
 
 

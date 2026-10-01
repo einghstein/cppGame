@@ -21,4 +21,8 @@ public:
     void InitGrid(const int gridWidth, const int gridHeight, const int blockSize);
     bool isOnGround(const Player& player, const std::vector<Block>& grid);
     void keyPressHandler(int deltaTime);
+    Block* getBlockAtPosition(float x, float y);
+    Block* getBlockAtPosition(sf::Vector2f worldPos);
+    void removeBlockAtPosition(float x, float y);
+    
 };

@@ -9,6 +9,19 @@ Camera::Camera(int WINDOW_HEIGHT, int WINDOW_WIDTH, float X, float Y, float Zoom
 {
 }
 
+sf::Vector2f Camera::screenToWorld(sf::Vector2f screenPos) const
+{
+    float worldX = (screenPos.x - x) / zoom;
+    float worldY = (screenPos.y - y) / zoom;
+    return sf::Vector2f(worldX, worldY);
+}
+sf::Vector2f Camera::screenToWorld(float screenX, float screenY) const
+{
+    float worldX = (screenX - x) / zoom;
+    float worldY = (screenY - y) / zoom;
+    return sf::Vector2f(worldX, worldY);
+}
+
 void Camera::Update(sf::RenderWindow& window, std::vector<Entity*> DrawBatch)
 {
     window.clear(sf::Color::Black);

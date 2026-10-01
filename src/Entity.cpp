@@ -12,12 +12,20 @@ Entity::Entity(float x, float y, int width, int height)
 
 void Entity::EDraw(sf::RenderWindow& window, float winX, float winY)
 {
-    if (DrawHitbox)
+    sf::RectangleShape rectangle;
+    rectangle.setSize(hitbox.getSize());
+    rectangle.setPosition({ winX, winY });
+    window.draw(rectangle);
+    if (DrawHitbox){
+    sf::Vertex line[] =
     {
-        sf::RectangleShape rectangle;
-        rectangle.setSize(hitbox.getSize());
-        rectangle.setPosition({ winX, winY });
+        sf::Vertex{{winX, winY}, sf::Color::Red},
+        sf::Vertex{{winX + hitbox.getSize().x, winY}, sf::Color::Red},
+        sf::Vertex{{winX + hitbox.getSize().x, winY + hitbox.getSize().y}, sf::Color::Red},
+        sf::Vertex{{winX, winY + hitbox.getSize().y}, sf::Color::Red},
+        sf::Vertex{{winX, winY}, sf::Color::Red}
+    };
 
-        window.draw(rectangle);
+        window.draw(line, 5, sf::PrimitiveType::LineStrip);
     }
 }

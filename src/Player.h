@@ -3,13 +3,16 @@
 #include "Entity.h"
 #include "Item.h"
 
+class Game;
+
 class Player : public Entity
 {
 public:
     Player(float x, float y, int width, int height, float drag, float speed);
 
-    void Update(bool isOnGround, float deltaTime);
+    void Update(bool isOnGround, float deltaTime, Game* game);
     void resetVelocity() { velocity_x = 0.f; velocity_y = 0.f; }
+    void mouseUpdate(Game* game);
     
     float velocity_x = 0.0f;
     float velocity_y = 0.0f;
