@@ -1,12 +1,13 @@
 #include "Game.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <algorithm>
 #include "FontLoader.h"
 
 Game::Game(int WINDOW_HEIGHT, int WINDOW_WIDTH, const char* executablePath)
     : clock(),
       debugFont(),
-      player(300.f, -100.f, 50, 50, 0.8f, 300.0f, this), // Player X, Y, width. height, drag, speed, game
+      player(300.f, -100.f, 50, 50, 0.8f, 500.0f, this), // Player X, Y, width. height, drag, speed, game
       entities(),
       camera(WINDOW_HEIGHT, WINDOW_WIDTH, 300.f, -100.f, 1.f), // WH, WW, X, Y, Zoom
       window(
@@ -43,25 +44,47 @@ Block* Game::getBlockAtPosition(sf::Vector2f worldPos)
     }
     return nullptr; // Return a default Block if no block is found at the position
 }
-
+void Game::removeBlockAtPosition(sf::Vector2f worldPos)
+{
+    for (auto it = grid.begin(); it != grid.end(); ++it)
+    {
+        if (it->hitbox.getGlobalBounds().contains(worldPos))
+        {
+            Block* removedBlock = &*it;
+            entities.erase(std::remove(entities.begin(), entities.end(), removedBlock), entities.end());
+            grid.erase(it);
+            return; // Exit after removing the block
+        }
+    }
+}
 void Game::removeBlockAtPosition(float x, float y)
 {
     for (auto it = grid.begin(); it != grid.end(); ++it)
     {
         if (it->hitbox.getGlobalBounds().contains(sf::Vector2f(x, y)))
         {
+            Block* removedBlock = &*it;
+            entities.erase(std::remove(entities.begin(), entities.end(), removedBlock), entities.end());
             grid.erase(it);
             return; // Exit after removing the block
         }
     }
 }
 
+void Game::placeBlockAtPosition(float x, float y)
+{
+    float blockX = static_cast<int>(x / this->blockSize) * this->blockSize;
+    float blockY = static_cast<int>(y / this->blockSize) * this->blockSize;
+    grid.emplace_back(blockX, blockY, this->blockSize, this->blockSize);
+    entities.push_back(&grid.back());
+}
+
 void Game::InitGrid( const int gridWidth, const int gridHeight, const int blockSize)
 {
     this->gridWidth = gridWidth;
     this->gridHeight = gridHeight;
+    this->blockSize = blockSize;
 
-    grid.reserve(gridWidth * gridHeight);
     entities.reserve(gridWidth * gridHeight + 1);
     entities.push_back(&player);
 

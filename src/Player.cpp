@@ -43,6 +43,7 @@ void Player::mouseUpdate()
             printf("%p\n", static_cast<void*>(game->getBlockAtPosition(mousePos.x, mousePos.y)));
         }
         else {
+            game->placeBlockAtPosition(mousePos.x, mousePos.y);
             printf("No block found at position (%f, %f)\n", static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
         }
     }
