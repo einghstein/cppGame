@@ -35,8 +35,9 @@ void Game::InitGrid(std::vector<Entity*> entities, const int gridWidth, const in
     {
         for (int j = 0; j < gridHeight; ++j)
         {
-            grid.emplace_back(i * blockSize, j * blockSize, blockSize, blockSize);
-            entities.push_back(&grid.back());
+            Block block(i * blockSize, j * blockSize, blockSize, blockSize);
+            grid.emplace_back(block);
+            entities.push_back(&block);
         }
     }
 }

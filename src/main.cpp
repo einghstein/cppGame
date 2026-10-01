@@ -42,7 +42,7 @@ int main(int, char* argv[])
 
         
 
-        game.player.Update(game.isOnGround(game.player, game.grid), deltaTime);
+        game.player.Update(isOnGround(game.player, game.grid), deltaTime);
 
         game.keyPressHandler(deltaTime);
 
