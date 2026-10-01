@@ -26,7 +26,9 @@ int main(int, char* argv[])
     debugText.setFillColor(sf::Color::White);
     debugText.setPosition(sf::Vector2f(10.f, 10.f));
 
-    game.InitGrid(game.entities, gridWidth, gridHeight, blockSize);
+    game.InitGrid(gridWidth, gridHeight, blockSize);
+
+    printf("Entity count after InitGrid: %zu\n", game.entities.size());
 
     while (game.window.isOpen())
     {
@@ -39,8 +41,6 @@ int main(int, char* argv[])
                 game.window.close();
             }
         }
-
-        
 
         game.player.Update(isOnGround(game.player, game.grid), deltaTime);
 

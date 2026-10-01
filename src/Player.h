@@ -13,9 +13,9 @@ public:
     
     float velocity_x = 0.0f;
     float velocity_y = 0.0f;
+    int hp;
 
 private:
-    int hp;
     Item inventory[10];
 
     float drag;

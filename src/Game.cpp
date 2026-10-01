@@ -19,10 +19,9 @@ Game::Game(int WINDOW_HEIGHT, int WINDOW_WIDTH, const char* executablePath)
 {
     if (!FontLoader::load(debugFont, executablePath))
         std::cerr << "Failed to load font\n";
-    entities.push_back(&player);
 }
 
-void Game::InitGrid(std::vector<Entity*> entities, const int gridWidth, const int gridHeight, const int blockSize)
+void Game::InitGrid( const int gridWidth, const int gridHeight, const int blockSize)
 {
     this->gridWidth = gridWidth;
     this->gridHeight = gridHeight;
@@ -35,11 +34,11 @@ void Game::InitGrid(std::vector<Entity*> entities, const int gridWidth, const in
     {
         for (int j = 0; j < gridHeight; ++j)
         {
-            Block block(i * blockSize, j * blockSize, blockSize, blockSize);
-            grid.emplace_back(block);
-            entities.push_back(&block);
+            grid.emplace_back(i * blockSize, j * blockSize, blockSize, blockSize);
+            entities.push_back(&grid.back());
         }
     }
+    printf("Entity count after InitGrid: %zu\n", entities.size());
 }
 
 

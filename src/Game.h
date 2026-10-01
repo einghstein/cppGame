@@ -14,11 +14,11 @@ public:
     sf::Clock clock;
     sf::Font debugFont;
     Player player;
+    std::vector<Entity*> entities;
     Camera camera;
     sf::RenderWindow window;
-    std::vector<Entity*> entities;
 
-    void InitGrid(std::vector<Entity*> entities, const int gridWidth, const int gridHeight, const int blockSize);
+    void InitGrid(const int gridWidth, const int gridHeight, const int blockSize);
     bool isOnGround(const Player& player, const std::vector<Block>& grid);
     void keyPressHandler(int deltaTime);
 };
